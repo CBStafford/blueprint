@@ -1,0 +1,41 @@
+@import url("https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.input-field{
+  border: black, solid, 1px;
+}
+
+button[type="submit"],
+input[type="submit"] {
+  background: dodgerblue;
+  color: white;
+  text-transform: uppercase;
+  border: none;
+  margin-top: 40px;
+  padding: 20px;
+  font-size: 16px;
+  font-weight: 100;
+  letter-spacing: 10px;
+  border-radius: 5px;
+}
+
+button[type="submit"]:hover,
+input[type="submit"]:hover {
+  background: #bf1650;
+  font-size: larger ;
+}
+
+
+.TripInfoHeader{
+  font-weight: bold;
+  font-size: 1.5em;
+  text-decoration: underline;
+}
+
+.trip-list-item{
+  font-weight: bold;
+}
+

@@ -1,0 +1,112 @@
+# ```yaml
+version: '3.8'
+
+services:
+  # Laravel API (PHP-FPM)
+  app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    volumes:
+      - ./backend:/var/www/html
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - laravel-net
+    env_file:
+      - backend/.env
+    environment:
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=laravel
+      - DB_USERNAME=root
+      - DB_PASSWORD=password
+      - APP_URL=http://localhost:8000
+      - FRONTEND_URL=http://localhost:3000
+      - MAIL_HOST=mailpit
+      - MAIL_PORT=1025
+
+  # Nginx for Laravel
+  nginx:
+    image: nginx:1.25
+    container_name: nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - ./backend:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - laravel-net
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0.39
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_DATABASE=laravel
+      - MYSQL_ROOT_PASSWORD=password
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - laravel-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    ports:
+      - "8080:80"
+    environment:
+      - PMA_HOST=mysql
+      - MYSQL_ROOT_PASSWORD=password
+    depends_on:
+      - mysql
+    networks:
+      - laravel-net
+
+  # Frontend (React / Next.js)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    working_dir: /app
+    command: ["npm", "run", "dev"]
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    networks:
+      - laravel-net
+
+  # Mailpit for email testing
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - laravel-net
+
+volumes:
+  dbdata:
+
+networks:
+  laravel-net:
+    driver: bridge
+# ```

@@ -11,12 +11,19 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// NOTE Public Routes
+// Public Routes (no auth required for development)
+Route::prefix('v1')->group(function() {
+    Route::get('/trips', [TripController::class, 'index']);
+    Route::post('/trips', [TripController::class, 'store']);
+    Route::get('/drivers', [DriverController::class, 'index']);
+    Route::post('/drivers', [DriverController::class, 'store']);
+});
 
-
-
-Route::group(['prefix'=>'v1', 'namespace'=>'App\Http\Controllers\Api\V1', 'middleware'=>'auth:sanctum'], function(){
-  
+// Protected Routes
+Route::group(['prefix'=>'v1', 'middleware'=>'auth:sanctum'], function(){
+    Route::apiResource('trips', TripController::class)->except(['index', 'store']);
+    Route::apiResource('drivers', DriverController::class)->except(['index', 'store']);
+    
     // Route::apiResource('my-leagues', LeagueController::class)->only([
     //     'index', 'show', 'store', 'update'
     // ]);
@@ -27,7 +34,4 @@ Route::group(['prefix'=>'v1', 'namespace'=>'App\Http\Controllers\Api\V1', 'middl
     // Route::delete('delete-my-team/{id}', [TeamController::class, 'delete']);
 
     // Route::get('/profile/{id}', [ProfileController::class, 'show']);
-
-    
 });
-// 

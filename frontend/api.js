@@ -38,7 +38,7 @@ export function getDrivers(){
                 }                   
             })
     ) 
-    console.log(trips)
+    console.log(drivers)
     return drivers;
 
 }
